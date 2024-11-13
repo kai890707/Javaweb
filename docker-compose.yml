@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  springDB:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: springdb
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./springdb-db-data:/var/lib/mysql
+  springDB_TEST:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: test_springdb_manager
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./springdb-test-db-data:/var/lib/mysql
