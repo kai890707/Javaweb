@@ -35,4 +35,4 @@ build/
 springdb-db-data
 springdb-test-db-data
 
-/src/main/java/com.example.javaweb/resources/application.properties
+/src/main/resources/application.properties

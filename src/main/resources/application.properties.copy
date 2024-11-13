@@ -1,3 +1,5 @@
+spring.mandatory-file-encoding=UTF-8
+
 spring.application.name=Javaweb
 
 # Database
@@ -6,14 +8,20 @@ spring.datasource.username=root
 spring.datasource.password=root
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-# ????????
+
+# Flyway 配置：指定遷移腳本的位置
 flyway.locations=classpath:db/migration
-# ??????????????????
+
+# Flyway 配置：當資料庫為空時，啟用 baseline 功能，並將首次執行的遷移版本設置為基準版本（防止遷移腳本重複執行）
 flyway.baseline-on-migrate=true
-# JPA Config
-# ?????????????? JPA ???entity???????????????
+
+# JPA 配置：設置 Hibernate 自動更新資料庫表結構。
+# 根據實體類的變更自動調整資料庫結構。
+# Production環境中建議禁用此配置，以防止無意中的表結構變更
 spring.jpa.hibernate.ddl-auto=update
-# ??????????SQL
+
+# JPA 配置：顯示 Hibernate 自動生成的 SQL 查詢語句，用於開發和調試
 spring.jpa.show-sql=true
 
+# JPA 配置：設置 Hibernate 使用的 SQL 方言，這裡指定了 MySQL 方言以適應 MySQL 的 SQL 語法
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
