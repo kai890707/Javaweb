@@ -15,14 +15,16 @@ public class ProductService {
      * ProductRepository 的實例，用於執行產品的資料庫操作。
      */
     private final ProductRepository productRepository;
+    private final GenericService genericService;
 
     /**
      * 依賴注入 ProductRepository。
      * @param productRepository ProductRepository 實例
      */
     @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, GenericService genericService) {
         this.productRepository = productRepository;
+        this.genericService = genericService;
     }
 
     /**
@@ -47,7 +49,7 @@ public class ProductService {
      * @param product 要儲存的產品實例
      * @return 儲存後的 Product 實例
      */
-    public Product  saveProduct(Product product) {
+    public Product saveProduct(Product product) {
         return productRepository.save(product);
     }
 
@@ -55,8 +57,22 @@ public class ProductService {
      * 根據產品 ID 刪除產品。
      * @param id 產品唯一 ID
      */
-    public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+    public boolean  deleteProduct(Long id) {
+        return genericService.deleteEntityWithChecker(productRepository, id);
+    }
+
+    /**
+     * 刪除產品並確認
+     * @param id 產品唯一 ID
+     * @return 布林值是否刪除成功
+     */
+    public boolean deleteProductWithChecker(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            productRepository.delete(product.get());
+            return true;
+        }
+        return false;
     }
 
     /**
