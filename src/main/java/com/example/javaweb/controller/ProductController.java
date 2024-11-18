@@ -1,8 +1,9 @@
 package com.example.javaweb.controller;
 
-import com.example.javaweb.service.GenericService;
-import com.example.javaweb.service.ProductService;
+import com.example.javaweb.Exception.ResourceNotFoundException;
+import com.example.javaweb.dto.response.ApiResponse;
 import com.example.javaweb.service.ErrorProcessor;
+import com.example.javaweb.service.productService.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,39 +15,26 @@ import java.util.Optional;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
-    private final ProductService productService;
-
     @Autowired
-    public ProductController(ProductService productService) {
-        this.productService = productService;
-    }
+    private ProductService productService;
 
     /**
      * 取得所有產品
      * @return 包含所有產品的列表
      */
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<ApiResponse<List<Product>>> getAllProducts() {
+        List<Product> products = productService.getAllProduct();
+        return ResponseEntity.ok(ApiResponse.success(products));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getProductById(@PathVariable Long id) {
-        Optional<Product> product = productService.getProductById(id);
-        if (!product.isPresent()) {
-            ErrorProcessor errorProcessor = new ErrorProcessor(
-                    HttpStatus.NOT_FOUND.value(),
-                    "Product not found",
-                    "Product with ID " + id + " was not found."
-            );
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(errorProcessor);
-        }
-        return ResponseEntity.ok(product.get());
+    public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Long id) throws ResourceNotFoundException {
+        Product product = productService.getProductById(id);
+        return ResponseEntity.ok(ApiResponse.success(product));
     }
 
     /**
@@ -55,10 +43,9 @@ public class ProductController {
      * @return 新增成功的產品資料及 201 狀態
      */
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-
-        Product createdProduct = productService.saveProduct(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
+    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody Product product) {
+        Product createdProduct = productService.createProduct(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(createdProduct));
     }
 
     /**
@@ -68,34 +55,9 @@ public class ProductController {
      * @return 成功更新的產品，或 404 錯誤狀態
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateProduct(@PathVariable Long id,@RequestBody Product product) {
-        // 物件可能為空，因此用 Optional
-        Optional<Product> existingProduct = productService.getProductById(id);
-        if (!existingProduct.isPresent()) {
-            ErrorProcessor errorProcessor = new ErrorProcessor(
-                    HttpStatus.NOT_FOUND.value(),
-                    "Product not found",
-                    "Product with ID " + id + " was not found."
-            );
-           return  ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(errorProcessor);
-        }
-
-        Product currentProduct = existingProduct.get();
-        if (product.getDescription() == null) {
-            product.setDescription(currentProduct.getDescription());
-        }
-        if (product.getPrice() == null) {
-            product.setPrice(currentProduct.getPrice());
-        }
-        if (product.getName() == null) {
-            product.setName(currentProduct.getName());
-        }
-
-        product.setId(id);
-        Product updateProdcut = productService.saveProduct(product);
-
-        return ResponseEntity.ok(updateProdcut);
+    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable Long id,@RequestBody Product product)  throws ResourceNotFoundException{
+        Product afterUpdateProduct = productService.updateProduct(id, product);
+        return ResponseEntity.ok(ApiResponse.success(afterUpdateProduct));
     }
 
     /**
@@ -104,23 +66,15 @@ public class ProductController {
      * @return 刪除通知
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteProduct(@PathVariable Long id) {
-        Optional<Product> existingProduct = productService.getProductById(id);
-        if (!existingProduct.isPresent()) {
-            ErrorProcessor errorProcessor = new ErrorProcessor(
-                    HttpStatus.NOT_FOUND.value(),
-                    "Product not found",
-                    "Product with ID " + id + " was not found."
-            );
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(errorProcessor);
+    public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable Long id) {
+        Boolean isDeleted = productService.deleteProduct(id);
+        if (!isDeleted) {
+            ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error(
+                            HttpStatus.CONFLICT.value(),
+                            "Product with id " + id + " can not be deleted"
+                    ));
         }
-
-        if (!productService.deleteProduct(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Product with ID " + id + " not found.");
-        }
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("Product with ID " + id + " has been deleted.");
+        return ResponseEntity.ok(ApiResponse.success("Product ID : " + id + " was deleted."));
     }
 }

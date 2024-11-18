@@ -7,7 +7,7 @@ CREATE TABLE payments (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 支付記錄創建時間
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  -- 支付記錄更新時間
-
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     -- 外鍵約束
     FOREIGN KEY (order_id) REFERENCES `order`(id)
 );

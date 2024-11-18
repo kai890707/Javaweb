@@ -6,7 +6,7 @@ CREATE TABLE wallets (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 錢包建立時間
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  -- 錢包更新時間
-
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     -- 外鍵約束
     FOREIGN KEY (user_id) REFERENCES user(id)
 );

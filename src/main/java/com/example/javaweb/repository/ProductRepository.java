@@ -2,6 +2,7 @@ package com.example.javaweb.repository;
 
 import com.example.javaweb.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -15,5 +16,19 @@ public interface ProductRepository extends JpaRepository <Product, Long> {
      * @return List<Product> 查詢結果
      */
     List<Product> findByName(String name);
+
+    /**
+     * 查詢所有記錄（包括已刪除）
+     * @return
+     */
+    @Query("SELECT p FROM Product p")
+    List<Product> findAllIncludingDeleted();
+
+    /**
+     * 查詢已刪除的記錄
+     * @return
+     */
+    @Query("SELECT p FROM Product p WHERE p.deletedAt IS NOT NULL")
+    List<Product> findDeleted();
 
 }
