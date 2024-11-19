@@ -7,13 +7,13 @@ import com.example.javaweb.entity.Payment;
 import java.util.List;
 
 public interface PaymentServiceInterface {
-    List<Payment> getAllPayments();
+    List<PaymentResponse> getAllPayments();
 
-    List<Payment> getPaymentsWithDeleted();
+    List<PaymentResponse> getPaymentsWithDeleted();
 
-    List<Payment> getDeletedPayments();
+    List<PaymentResponse> getDeletedPayments();
 
-    Payment getPaymentById(Long id);
+    PaymentResponse getPaymentById(Long id);
 
     PaymentResponse createPayment(PaymentRequest payment);
 

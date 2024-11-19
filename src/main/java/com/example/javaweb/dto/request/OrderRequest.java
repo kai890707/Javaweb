@@ -2,11 +2,20 @@ package com.example.javaweb.dto.request;
 
 public class OrderRequest {
 
+    private Long orderId;
     private Long productId; // 用於映射 product 的 ID
     private Long userId;    // 用於映射 user 的 ID
     private Integer quantity; // 訂單的數量
 
     // Getters 和 Setters
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
     public Long getProductId() {
         return productId;
     }

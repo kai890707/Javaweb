@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import com.example.javaweb.service.walletService.WalletService;
 
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin
 @RestController

@@ -2,6 +2,7 @@ package com.example.javaweb.service.orderService;
 
 import com.example.javaweb.Exception.ResourceNotFoundException;
 import com.example.javaweb.dto.request.OrderRequest;
+import com.example.javaweb.dto.response.OrderResponse;
 import com.example.javaweb.entity.Order;
 import com.example.javaweb.entity.Product;
 import com.example.javaweb.entity.User;
@@ -33,8 +34,11 @@ public class OrderService implements OrderServiceInterface {
      * @return 訂單
      */
     @Override
-    public List<Order> getAllOrders() {
-        return this.orderRepository.findAll();
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orders = this.orderRepository.findAll();
+        return orders.stream()
+                .map(OrderResponse::new)
+                .toList();
     }
 
     /**
@@ -42,8 +46,11 @@ public class OrderService implements OrderServiceInterface {
      * @return 訂單
      */
     @Override
-    public List<Order> getOrdersWithDeleted() {
-        return this.orderRepository.findAllIncludingDeleted();
+    public List<OrderResponse> getOrdersWithDeleted() {
+        List<Order> orders = this.orderRepository.findAllIncludingDeleted();
+        return orders.stream()
+                .map(OrderResponse::new)
+                .toList();
     }
 
     /**
@@ -51,8 +58,22 @@ public class OrderService implements OrderServiceInterface {
      * @return 訂單
      */
     @Override
-    public List<Order> getDeletedOrders() {
-        return this.orderRepository.findDeleted();
+    public List<OrderResponse> getDeletedOrders() {
+        List<Order> orders = this.orderRepository.findDeleted();
+        return orders.stream()
+                .map(OrderResponse::new)
+                .toList();
+    }
+
+    /**
+     * 取得order實體
+     * @param id order id
+     * @return order實體
+     * @throws ResourceNotFoundException
+     */
+    public Order getOrderEntityById(Long id) throws ResourceNotFoundException {
+        return this.orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found!"));
     }
 
     /**
@@ -62,30 +83,32 @@ public class OrderService implements OrderServiceInterface {
      * @throws ResourceNotFoundException
      */
     @Override
-    public Order getOrderById(Long orderId) throws ResourceNotFoundException {
-        return this.orderRepository.findById(orderId)
+    public OrderResponse getOrderById(Long orderId) throws ResourceNotFoundException {
+        Order order = this.orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found!"));
+        return new OrderResponse(order);
     }
 
     /**
      * 新增訂單
-     * @param order 訂單資料
+     * @param OrderResponse 訂單資料
      * @return 新增後的訂單
      * @throws ResourceNotFoundException
      */
     @Override
-    public Order createOrder(OrderRequest orderRequest) throws ResourceNotFoundException {
+    public OrderResponse createOrder(OrderRequest orderRequest) throws ResourceNotFoundException {
         if (orderRequest.getProductId() == null || orderRequest.getUserId() == null) {
             throw new IllegalArgumentException("Product ID and User ID must not be null");
         }
-        Product product = this.productService.getProductById(orderRequest.getProductId());
-        User user = this.userService.getUserById(orderRequest.getUserId());
+        Product product = this.productService.getProductEntityById(orderRequest.getProductId());
+        User user = this.userService.getUserEntityById(orderRequest.getUserId());
 
         Order order = new Order();
         order.setProduct(product);
         order.setUser(user);
         order.setQuantity(orderRequest.getQuantity());
-        return this.orderRepository.save(order);
+        Order savedOrder = this.orderRepository.save(order);
+        return new OrderResponse(savedOrder);
     }
 
     /**
@@ -95,13 +118,16 @@ public class OrderService implements OrderServiceInterface {
      * @throws ResourceNotFoundException
      */
     @Override
-    public Order updateOrder(Long id, Order order) throws ResourceNotFoundException {
-        Order orderEntity = this.orderRepository.findById(order.getId())
+    public OrderResponse updateOrder(Long id, OrderRequest orderRequest) throws ResourceNotFoundException {
+        Order orderEntity = this.orderRepository.findById(orderRequest.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found!"));
-        orderEntity.setProduct(order.getProduct());
-        orderEntity.setQuantity(order.getQuantity());
-        orderEntity.setUser(order.getUser());
-        return this.orderRepository.save(orderEntity);
+        Product product = this.productService.getProductEntityById(orderRequest.getProductId());
+        User user = this.userService.getUserEntityById(orderRequest.getUserId());
+        orderEntity.setProduct(product);
+        orderEntity.setQuantity(orderRequest.getQuantity());
+        orderEntity.setUser(user);
+        Order updatedOrder = this.orderRepository.save(orderEntity);
+        return new OrderResponse(updatedOrder);
     }
 
     /**

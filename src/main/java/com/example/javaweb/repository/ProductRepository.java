@@ -15,7 +15,7 @@ public interface ProductRepository extends JpaRepository <Product, Long> {
      * @param name 產品名稱
      * @return List<Product> 查詢結果
      */
-    List<Product> findByName(String name);
+    Product findByName(String name);
 
     /**
      * 查詢所有記錄（包括已刪除）

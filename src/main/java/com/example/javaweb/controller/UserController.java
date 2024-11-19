@@ -1,10 +1,9 @@
 package com.example.javaweb.controller;
 
 import com.example.javaweb.Exception.ResourceNotFoundException;
-import com.example.javaweb.dto.UserWalletResponse;
+import com.example.javaweb.dto.request.UserRequest;
 import com.example.javaweb.dto.response.ApiResponse;
-import com.example.javaweb.entity.User;
-import com.example.javaweb.service.ErrorProcessor;
+import com.example.javaweb.dto.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +12,10 @@ import com.example.javaweb.service.userService.UserService;
 import com.example.javaweb.service.walletService.WalletService;
 
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
     @Autowired
@@ -31,8 +29,8 @@ public class UserController {
      * @return 所有user
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<User>>> getAllUsers() {
-        List<User> user =  userService.getAllUser();
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+        List<UserResponse> user = userService.getAllUser();
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
@@ -43,8 +41,8 @@ public class UserController {
      * @throws ResourceNotFoundException
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable Long id) throws ResourceNotFoundException {
-        User user = userService.getUserById(id);
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Long id) throws ResourceNotFoundException {
+        UserResponse user = userService.getUserById(id);
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
@@ -54,23 +52,23 @@ public class UserController {
      * @return 新增後的使用者實體
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<User>> createUserWithWallet(@RequestBody User user) {
-        User userEntity = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(user));
+    public ResponseEntity<ApiResponse<UserResponse>> createUserWithWallet(@RequestBody UserRequest user) {
+        UserResponse userResponse = userService.createUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(userResponse));
 
     }
 
     /**
      * 更新使用者資料
      * @param id 使用者ID
-     * @param user 使用者資料
+     * @param UserRequest 使用者資料
      * @return 使用者更新後資料
      * @throws ResourceNotFoundException
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable Long id, @RequestBody User user) throws ResourceNotFoundException {
-        User userEntity = userService.updateUser(id,user);
-        return ResponseEntity.ok(ApiResponse.success(userEntity));
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) throws ResourceNotFoundException {
+        UserResponse userResponse = userService.updateUser(id,userRequest);
+        return ResponseEntity.ok(ApiResponse.success(userResponse));
     }
 
     /**

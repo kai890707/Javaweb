@@ -25,8 +25,8 @@ public class PaymentController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Payment>>> getAllPayments() {
-        List<Payment> payments = paymentService.getAllPayments();
+    public ResponseEntity<ApiResponse<List<PaymentResponse>>> getAllPayments() {
+        List<PaymentResponse> payments = paymentService.getAllPayments();
         return ResponseEntity.ok(ApiResponse.success(payments));
     }
 
@@ -37,8 +37,8 @@ public class PaymentController {
      * @throws ResourceNotFoundException
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Payment>> getPaymentById(Long id) throws ResourceNotFoundException {
-        Payment payment = paymentService.getPaymentById(id);
+    public ResponseEntity<ApiResponse<PaymentResponse>> getPaymentById(Long id) throws ResourceNotFoundException {
+        PaymentResponse payment = paymentService.getPaymentById(id);
         return ResponseEntity.ok(ApiResponse.success(payment));
     }
 

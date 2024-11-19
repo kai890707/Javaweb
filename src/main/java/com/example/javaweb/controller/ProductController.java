@@ -1,7 +1,9 @@
 package com.example.javaweb.controller;
 
 import com.example.javaweb.Exception.ResourceNotFoundException;
+import com.example.javaweb.dto.request.ProductRequest;
 import com.example.javaweb.dto.response.ApiResponse;
+import com.example.javaweb.dto.response.ProductResponse;
 import com.example.javaweb.service.ErrorProcessor;
 import com.example.javaweb.service.productService.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,38 +27,38 @@ public class ProductController {
      * @return 包含所有產品的列表
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Product>>> getAllProducts() {
-        List<Product> products = productService.getAllProduct();
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
+        List<ProductResponse> products = productService.getAllProduct();
         return ResponseEntity.ok(ApiResponse.success(products));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Long id) throws ResourceNotFoundException {
-        Product product = productService.getProductById(id);
-        return ResponseEntity.ok(ApiResponse.success(product));
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable Long id) throws ResourceNotFoundException {
+        ProductResponse productResponse = productService.getProductById(id);
+        return ResponseEntity.ok(ApiResponse.success(productResponse));
     }
 
     /**
      * 新增產品
-     * @param product 要新增的產品資料
+     * @param ProductRequest 要新增的產品資料
      * @return 新增成功的產品資料及 201 狀態
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody Product product) {
-        Product createdProduct = productService.createProduct(product);
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@RequestBody ProductRequest productRequest) {
+        ProductResponse createdProduct = productService.createProduct(productRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(createdProduct));
     }
 
     /**
      * 更新產品
      * @param id 要更新的產品 ID
-     * @param product 更新後的產品資料
+     * @param ProductRequest 更新後的產品資料
      * @return 成功更新的產品，或 404 錯誤狀態
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable Long id,@RequestBody Product product)  throws ResourceNotFoundException{
-        Product afterUpdateProduct = productService.updateProduct(id, product);
-        return ResponseEntity.ok(ApiResponse.success(afterUpdateProduct));
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@PathVariable Long id,@RequestBody ProductRequest productRequest)  throws ResourceNotFoundException{
+        ProductResponse productResponse = productService.updateProduct(id, productRequest);
+        return ResponseEntity.ok(ApiResponse.success(productResponse));
     }
 
     /**

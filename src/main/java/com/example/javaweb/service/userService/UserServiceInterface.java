@@ -1,22 +1,24 @@
 package com.example.javaweb.service.userService;
 
+import com.example.javaweb.dto.request.UserRequest;
+import com.example.javaweb.dto.response.UserResponse;
 import com.example.javaweb.entity.User;
 
 import java.util.List;
 
 public interface UserServiceInterface {
 
-    List<User> getAllUser();
+    List<UserResponse> getAllUser();
 
-    List<User> getUsersWithDeleted();
+    List<UserResponse> getUsersWithDeleted();
 
-    List<User> getDeletedUsers();
+    List<UserResponse> getDeletedUsers();
 
-    User getUserById(Long id);
+    UserResponse getUserById(Long id);
 
-    User createUser(User user);
+    UserResponse createUser(UserRequest user);
 
-    User updateUser(Long id, User user);
+    UserResponse updateUser(Long id, UserRequest user);
 
     Boolean deleteUser(Long id);
 }

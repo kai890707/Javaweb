@@ -3,6 +3,7 @@ package com.example.javaweb.controller;
 import com.example.javaweb.Exception.ResourceNotFoundException;
 import com.example.javaweb.dto.request.OrderRequest;
 import com.example.javaweb.dto.response.ApiResponse;
+import com.example.javaweb.dto.response.OrderResponse;
 import com.example.javaweb.entity.Order;
 import com.example.javaweb.service.orderService.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,8 @@ public class OrderController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Order>>> getAllOrder() {
-        List<Order> orders = this.orderService.getAllOrders();
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllOrder() {
+        List<OrderResponse> orders = this.orderService.getAllOrders();
         return ResponseEntity.ok(ApiResponse.success(orders));
     }
 
@@ -36,8 +37,8 @@ public class OrderController {
      * @throws ResourceNotFoundException
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Order>> getOrderById(@PathVariable Long id) throws ResourceNotFoundException {
-        Order order = this.orderService.getOrderById(id);
+    public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(@PathVariable Long id) throws ResourceNotFoundException {
+        OrderResponse order = this.orderService.getOrderById(id);
         return ResponseEntity.ok(ApiResponse.success(order));
     }
 
@@ -47,8 +48,8 @@ public class OrderController {
      * @return 新增後的訂單實體
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<Order>> createOrder(@RequestBody OrderRequest orderRequest){
-        Order orderEntity = this.orderService.createOrder(orderRequest);
+    public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@RequestBody OrderRequest orderRequest){
+        OrderResponse orderEntity = this.orderService.createOrder(orderRequest);
         return ResponseEntity.ok(ApiResponse.success(orderEntity));
     }
 
@@ -60,9 +61,9 @@ public class OrderController {
      * @throws ResourceNotFoundException
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Order>> updateOrder(@PathVariable Long id, @RequestBody  Order order) throws ResourceNotFoundException {
-        Order orderEntity = this.orderService.updateOrder(id,order);
-        return ResponseEntity.ok(ApiResponse.success(orderEntity));
+    public ResponseEntity<ApiResponse<OrderResponse>> updateOrder(@PathVariable Long id, @RequestBody OrderRequest order) throws ResourceNotFoundException {
+        OrderResponse updatedOrder = this.orderService.updateOrder(id,order);
+        return ResponseEntity.ok(ApiResponse.success(updatedOrder));
     }
 
     /**

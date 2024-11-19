@@ -1,16 +1,17 @@
 package com.example.javaweb.service.userService;
 
 import com.example.javaweb.Exception.ResourceNotFoundException;
-import com.example.javaweb.entity.Product;
+import com.example.javaweb.dto.request.UserRequest;
+import com.example.javaweb.dto.response.PaymentResponse;
 import com.example.javaweb.entity.User;
 import com.example.javaweb.repository.UserRepository;
+import com.example.javaweb.dto.response.UserResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -24,24 +25,33 @@ public class UserService implements UserServiceInterface {
      * @return 使用者
      */
     @Override
-    public List<User> getAllUser() {
-        return this.userRepository.findAll();
+    public List<UserResponse> getAllUser() {
+        List<User> users = this.userRepository.findAll();
+        return users.stream()
+                .map(UserResponse::new)
+                .toList();
     }
 
     /**
      * 查詢所有記錄（包括已刪除）
      * @return 使用者
      */
-    public List<User> getUsersWithDeleted() {
-        return this.userRepository.findAllIncludingDeleted();
+    public List<UserResponse> getUsersWithDeleted() {
+        List<User> users = this.userRepository.findAllIncludingDeleted();
+        return users.stream()
+                .map(UserResponse::new)
+                .toList();
     }
 
     /**
      * 查詢已刪除的記錄
      * @return 使用者
      */
-    public List<User> getDeletedUsers() {
-        return this.userRepository.findDeleted();
+    public List<UserResponse> getDeletedUsers() {
+        List<User> users = this.userRepository.findDeleted();
+        return users.stream()
+                .map(UserResponse::new)
+                .toList();
     }
 
     /**
@@ -51,19 +61,38 @@ public class UserService implements UserServiceInterface {
      * @throws ResourceNotFoundException
      */
     @Override
-    public User getUserById(Long id) throws ResourceNotFoundException {
-        return this.userRepository.findById(id)
+    public UserResponse getUserById(Long id) throws ResourceNotFoundException {
+        User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        return new UserResponse(user);
+    }
+
+    /**
+     * 取得UserID實體
+     * @param id
+     * @return
+     * @throws ResourceNotFoundException
+     */
+    public User getUserEntityById(Long id) throws ResourceNotFoundException {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found for this id: " + id));
     }
 
     /**
      * 新增使用者
-     * @param user 使用者資料
+     * @param UserRequest 使用者資料
      * @return 新增後的使用者實體
      */
     @Override
-    public User createUser(User user) {
-        return this.userRepository.save(user);
+    public UserResponse createUser(UserRequest userRequest) {
+        if (userRequest.getAccount() == null || userRequest.getPassword() == null) {
+            throw new IllegalArgumentException("User account and password must not be null");
+        }
+        User user = new User();
+        user.setAccount(userRequest.getAccount());
+        user.setPassword(userRequest.getPassword());
+        User userCreated = this.userRepository.save(user);
+        return new UserResponse(userCreated);
     }
 
     /**
@@ -73,11 +102,16 @@ public class UserService implements UserServiceInterface {
      * @throws ResourceNotFoundException
      */
     @Override
-    public User updateUser(Long id, User user) throws ResourceNotFoundException {
+    public UserResponse updateUser(Long id, UserRequest userRequest) throws ResourceNotFoundException {
+        if (userRequest.getPassword() == null) {
+            throw new IllegalArgumentException("User password must not be null");
+        }
         User userEntity = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + id));
-        userEntity.setPassword(user.getPassword());
-        return this.userRepository.save(userEntity);
+
+        userEntity.setPassword(userRequest.getPassword());
+        userEntity = this.userRepository.save(userEntity);
+        return new UserResponse(userEntity);
     }
 
     /**

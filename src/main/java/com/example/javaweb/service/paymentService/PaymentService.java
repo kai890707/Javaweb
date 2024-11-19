@@ -35,8 +35,11 @@ public class PaymentService implements PaymentServiceInterface{
      * @return 結帳單
      */
     @Override
-    public List<Payment> getAllPayments() {
-        return this.paymentRepository.findAll();
+    public List<PaymentResponse> getAllPayments() {
+        List<Payment> payments = this.paymentRepository.findAll();
+        return payments.stream()
+                .map(PaymentResponse::new)
+                .toList();
     }
 
     /**
@@ -44,8 +47,11 @@ public class PaymentService implements PaymentServiceInterface{
      * @return 帳單
      */
     @Override
-    public List<Payment> getPaymentsWithDeleted() {
-        return this.paymentRepository.findAllIncludingDeleted();
+    public List<PaymentResponse> getPaymentsWithDeleted() {
+        List<Payment> payments = this.paymentRepository.findAllIncludingDeleted();
+        return payments.stream()
+                .map(PaymentResponse::new)
+                .toList();
     }
 
     /**
@@ -53,8 +59,21 @@ public class PaymentService implements PaymentServiceInterface{
      * @return 帳單
      */
     @Override
-    public List<Payment> getDeletedPayments() {
-        return this.paymentRepository.findDeleted();
+    public List<PaymentResponse> getDeletedPayments() {
+        List<Payment> payments = this.paymentRepository.findDeleted();
+        return payments.stream()
+                .map(PaymentResponse::new)
+                .toList();
+    }
+
+    /**
+     * 取得payment實體
+     * @param id
+     * @return
+     */
+    public Payment getPaymentEntityById(Long id) {
+        return this.paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
     }
 
     /**
@@ -64,9 +83,10 @@ public class PaymentService implements PaymentServiceInterface{
      * @throws ResourceNotFoundException
      */
     @Override
-    public Payment getPaymentById(Long id) throws ResourceNotFoundException {
-        return this.paymentRepository.findById(id)
+    public PaymentResponse getPaymentById(Long id) throws ResourceNotFoundException {
+        Payment payment = this.paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+        return new PaymentResponse(payment);
     }
 
     /**
@@ -85,8 +105,8 @@ public class PaymentService implements PaymentServiceInterface{
             throw new IllegalArgumentException("Payment already exists for orderId: " + paymentRequest.getOrderId());
         }
 
-        Order order = this.orderService.getOrderById(paymentRequest.getOrderId());
-        Product product = this.productService.getProductById(order.getProduct().getId());
+        Order order = this.orderService.getOrderEntityById(paymentRequest.getOrderId());
+        Product product = this.productService.getProductEntityById(order.getProduct().getId());
 
         Payment payment = new Payment();
         payment.setTotalAmount(product.getPrice() * order.getQuantity());
@@ -112,8 +132,8 @@ public class PaymentService implements PaymentServiceInterface{
         if (paymentRequest.getOrderId() == null) {
             paymentEntity.setIsPaid(paymentRequest.getIsPaid());
         } else {
-            Order order = this.orderService.getOrderById(paymentRequest.getOrderId());
-            Product product = this.productService.getProductById(order.getProduct().getId());
+            Order order = this.orderService.getOrderEntityById(paymentRequest.getOrderId());
+            Product product = this.productService.getProductEntityById(order.getProduct().getId());
 
             if (order.getDeletedAt() != null) {
                 throw new ResourceNotFoundException("Order deleted at is null");

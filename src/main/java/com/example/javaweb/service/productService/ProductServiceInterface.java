@@ -1,5 +1,7 @@
 package com.example.javaweb.service.productService;
 
+import com.example.javaweb.dto.request.ProductRequest;
+import com.example.javaweb.dto.response.ProductResponse;
 import com.example.javaweb.entity.Product;
 
 import java.util.List;
@@ -7,19 +9,19 @@ import java.util.Optional;
 
 public interface ProductServiceInterface {
 
-    List<Product> getAllProduct();
+    List<ProductResponse> getAllProduct();
 
-    List<Product> getProductsWithDeleted();
+    List<ProductResponse> getProductsWithDeleted();
 
-    List<Product> getDeletedProducts();
+    List<ProductResponse> getDeletedProducts();
 
-    List<Product> getProductsByName(String name);
+    ProductResponse getProductsByName(String name);
 
-    Product getProductById(Long productId);
+    ProductResponse getProductById(Long productId);
 
-    Product createProduct(Product product);
+    ProductResponse createProduct(ProductRequest product);
 
-    Product updateProduct(Long id, Product product);
+    ProductResponse updateProduct(Long id, ProductRequest product);
 
     Boolean deleteProduct(Long id);
 }
