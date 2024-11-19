@@ -90,6 +90,7 @@ public class ProductService implements ProductServiceInterface {
      * 刪除產品
      * @param id 產品ID
      * @throws ResourceNotFoundException
+     * @return 是否軟刪除成功
      */
     @Override
     public Boolean deleteProduct(Long id) throws ResourceNotFoundException {

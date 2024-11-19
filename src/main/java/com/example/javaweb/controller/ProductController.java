@@ -11,11 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.javaweb.entity.Product;
 
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/api/v1/product")
 public class ProductController {
 
     @Autowired

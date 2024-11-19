@@ -1,4 +1,5 @@
 package com.example.javaweb.service.orderService;
+import com.example.javaweb.dto.request.OrderRequest;
 import com.example.javaweb.entity.Order;
 import java.util.List;
 
@@ -12,9 +13,9 @@ public interface OrderServiceInterface {
 
     Order getOrderById(Long orderId);
 
-    Order createOrder(Order order);
+    Order createOrder(OrderRequest order);
 
-    Order updateOrder(Order order);
+    Order updateOrder(Long id,Order order);
 
-    void deleteOrder(Long id);
+    Boolean deleteOrder(Long id);
 }

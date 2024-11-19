@@ -1,7 +1,6 @@
 package com.example.javaweb.service.walletService;
 
 import com.example.javaweb.Exception.ResourceNotFoundException;
-import com.example.javaweb.entity.User;
 import com.example.javaweb.entity.Wallet;
 import com.example.javaweb.repository.WalletRepository;
 import jakarta.transaction.Transactional;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -46,14 +44,14 @@ public class WalletService implements WalletServiceInterface {
 
     /**
      * 取得錢包 with user id
-     * @param id 使用者id
+     * @param userId 使用者id
      * @return 使用者資料
      * @throws ResourceNotFoundException
      */
     @Override
-    public Wallet getWalletById(Long id) throws ResourceNotFoundException {
-        return this.walletRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + id));
+    public Wallet getWalletById(Long userId) throws ResourceNotFoundException {
+        return this.walletRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + userId));
     }
 
     /**
@@ -85,12 +83,14 @@ public class WalletService implements WalletServiceInterface {
      * 刪除錢包
      * @param userId 使用者ID
      * @throws ResourceNotFoundException
+     * @return 是否軟刪除成功
      */
     @Override
-    public void deleteWallet(Long userId) throws ResourceNotFoundException {
+    public Boolean deleteWallet(Long userId) throws ResourceNotFoundException {
         Wallet walletEntity = this.walletRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found for user id :: " + userId));
         walletEntity.setDeletedAt(LocalDateTime.now());
-        this.walletRepository.save(walletEntity);
+        LocalDateTime deleteTime = this.walletRepository.save(walletEntity).getDeletedAt();
+        return deleteTime != null;
     }
 }

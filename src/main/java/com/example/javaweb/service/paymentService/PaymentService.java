@@ -1,14 +1,21 @@
 package com.example.javaweb.service.paymentService;
 
 import com.example.javaweb.Exception.ResourceNotFoundException;
+import com.example.javaweb.dto.request.PaymentRequest;
+import com.example.javaweb.dto.response.PaymentResponse;
+import com.example.javaweb.entity.Order;
 import com.example.javaweb.entity.Payment;
+import com.example.javaweb.entity.Product;
 import com.example.javaweb.repository.PaymentRepository;
+import com.example.javaweb.service.orderService.OrderService;
+import com.example.javaweb.service.productService.ProductService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -16,6 +23,12 @@ public class PaymentService implements PaymentServiceInterface{
 
     @Autowired
     PaymentRepository paymentRepository;
+
+    @Autowired
+    ProductService productService;
+
+    @Autowired
+    OrderService orderService;
 
     /**
      * 取得所有帳單(不含以軟刪除)
@@ -62,8 +75,27 @@ public class PaymentService implements PaymentServiceInterface{
      * @return 帳單
      */
     @Override
-    public Payment createPayment(Payment payment) {
-        return this.paymentRepository.save(payment);
+    public PaymentResponse createPayment(PaymentRequest paymentRequest) throws ResourceNotFoundException,IllegalArgumentException {
+        if (paymentRequest.getOrderId() == null) {
+            throw new IllegalArgumentException("Order ID must not be null");
+        }
+
+        Optional<Payment> existingPayment = this.paymentRepository.findByOrderId(paymentRequest.getOrderId());
+        if (existingPayment.isPresent()) {
+            throw new IllegalArgumentException("Payment already exists for orderId: " + paymentRequest.getOrderId());
+        }
+
+        Order order = this.orderService.getOrderById(paymentRequest.getOrderId());
+        Product product = this.productService.getProductById(order.getProduct().getId());
+
+        Payment payment = new Payment();
+        payment.setTotalAmount(product.getPrice() * order.getQuantity());
+        payment.setIsPaid(false);
+        payment.setOrder(order);
+
+        Payment savedPayment = this.paymentRepository.save(payment);
+
+        return new PaymentResponse(savedPayment);
     }
 
     /**
@@ -73,20 +105,41 @@ public class PaymentService implements PaymentServiceInterface{
      * @throws ResourceNotFoundException
      */
     @Override
-    public Payment updatePayment(Payment payment) throws ResourceNotFoundException {
-        Payment paymentEntity = this.paymentRepository.findById(payment.getId())
+    public PaymentResponse updatePayment(Long id, PaymentRequest paymentRequest) throws ResourceNotFoundException {
+        Payment paymentEntity = this.paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-        paymentEntity.setOrder(payment.getOrder());
-        paymentEntity.setIsPaid(payment.getIsPaid());
-        paymentEntity.setTotalAmount(payment.getTotalAmount());
-        return this.paymentRepository.save(paymentEntity);
+
+        if (paymentRequest.getOrderId() == null) {
+            paymentEntity.setIsPaid(paymentRequest.getIsPaid());
+        } else {
+            Order order = this.orderService.getOrderById(paymentRequest.getOrderId());
+            Product product = this.productService.getProductById(order.getProduct().getId());
+
+            if (order.getDeletedAt() != null) {
+                throw new ResourceNotFoundException("Order deleted at is null");
+            }
+
+            paymentEntity.setOrder(order);
+            paymentEntity.setIsPaid(paymentRequest.getIsPaid());
+            paymentEntity.setTotalAmount(product.getPrice() * order.getQuantity());
+        }
+
+        Payment savedPayment = this.paymentRepository.save(paymentEntity);
+        return new PaymentResponse(savedPayment);
     }
 
+    /**
+     * 刪除帳單
+     * @param id 帳單ID
+     * @return 是否刪除成功
+     * @throws ResourceNotFoundException
+     */
     @Override
-    public void deletePayment(Long id) throws ResourceNotFoundException {
+    public Boolean deletePayment(Long id) throws ResourceNotFoundException {
         Payment paymentEntity = this.paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
         paymentEntity.setDeletedAt(LocalDateTime.now());
-        this.paymentRepository.save(paymentEntity);
+        LocalDateTime deletedTime = this.paymentRepository.save(paymentEntity).getDeletedAt();
+        return deletedTime != null;
     }
 }

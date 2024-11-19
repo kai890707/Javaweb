@@ -1,5 +1,7 @@
 package com.example.javaweb.service.paymentService;
 
+import com.example.javaweb.dto.request.PaymentRequest;
+import com.example.javaweb.dto.response.PaymentResponse;
 import com.example.javaweb.entity.Payment;
 
 import java.util.List;
@@ -13,9 +15,9 @@ public interface PaymentServiceInterface {
 
     Payment getPaymentById(Long id);
 
-    Payment createPayment(Payment payment);
+    PaymentResponse createPayment(PaymentRequest payment);
 
-    Payment updatePayment(Payment payment);
+    PaymentResponse updatePayment(Long id,PaymentRequest paymentRequest);
 
-    void deletePayment(Long id);
+    Boolean deletePayment(Long id);
 }

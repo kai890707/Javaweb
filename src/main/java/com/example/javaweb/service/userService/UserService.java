@@ -73,10 +73,9 @@ public class UserService implements UserServiceInterface {
      * @throws ResourceNotFoundException
      */
     @Override
-    public User updateUser(User user) throws ResourceNotFoundException {
-        User userEntity = this.userRepository.findById(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + user.getId()));
-        userEntity.setAccount(user.getAccount());
+    public User updateUser(Long id, User user) throws ResourceNotFoundException {
+        User userEntity = this.userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + id));
         userEntity.setPassword(user.getPassword());
         return this.userRepository.save(userEntity);
     }
@@ -85,12 +84,14 @@ public class UserService implements UserServiceInterface {
      * 刪除使用者
      * @param id 使用者ID
      * @throws ResourceNotFoundException
+     * @return 是否軟刪除成功
      */
     @Override
-    public void deleteUser(Long id) throws ResourceNotFoundException {
+    public Boolean deleteUser(Long id) throws ResourceNotFoundException {
         User userEntity = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + id));
         userEntity.setDeletedAt(LocalDateTime.now());
-            this.userRepository.save(userEntity);
+        LocalDateTime deleteTime = this.userRepository.save(userEntity).getDeletedAt();
+        return deleteTime != null;
     }
 }

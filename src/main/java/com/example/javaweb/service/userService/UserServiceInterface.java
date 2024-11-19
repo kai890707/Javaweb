@@ -16,7 +16,7 @@ public interface UserServiceInterface {
 
     User createUser(User user);
 
-    User updateUser(User user);
+    User updateUser(Long id, User user);
 
-    void deleteUser(Long id);
+    Boolean deleteUser(Long id);
 }
